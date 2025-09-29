@@ -52,6 +52,12 @@ export const getStories = validator.catchError(
   async (req: AuthenticatedRequest, res: Response) => {
     try {
       const userId = req.user?.id;
+
+      if (!userId) {
+        res.status(200).json([]);
+        return;
+      }
+
       const stories = await db.story.findMany({
         where: { userId },
       });
