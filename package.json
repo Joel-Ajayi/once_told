@@ -7,7 +7,7 @@
   "type": "commonjs",
   "main": "index.js",
   "scripts": {
-    "start": "node dist/index.js",
+    "start": "NODE_ENV=production node dist/index.js",
     "build": "tsc",
     "dev": "ts-node-dev --no-notify --respawn --transpile-only src/index.ts",
     "dev:typecheck": "tsc --noEmit --watch",
