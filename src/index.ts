@@ -10,6 +10,7 @@ import path from "path";
 import {
   createStory,
   getStories,
+  getStory,
   transcribeStory,
   translateStory,
 } from "./controllers/stories.controller";
@@ -77,6 +78,7 @@ const upload = multer({
   // stories
   app.post("/api/stories", upload.single("audio"), createStory);
   app.get("/api/stories", getStories);
+  app.get("/api/stories/story", getStory);
   app.post("/api/stories/translate", translateStory);
   app.post("/api/stories/transcribe", transcribeStory);
 

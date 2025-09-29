@@ -60,6 +60,28 @@ export const getStories = async (req: AuthenticatedRequest, res: Response) => {
   }
 };
 
+export const getStory = async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const story_Id = String(req.body?.story_Id || "");
+    if (!story_Id) {
+      throw new HttpError("Invalid story id", 400);
+    }
+
+    const userId = req.user?.id;
+    const story = await db.story.findUnique({
+      where: { userId, id: story_Id },
+    });
+
+    if (!story) {
+      throw new HttpError("Story not found", 404);
+    }
+
+    res.status(200).json(story); // changed to 200
+  } catch (error) {
+    throw new HttpError("Failed to get stories", 500);
+  }
+};
+
 export const transcribeStory = validator.catchError(
   async (req: AuthenticatedRequest, res: Response) => {
     const story_Id = String(req.body?.story_Id || "");
@@ -71,7 +93,7 @@ export const transcribeStory = validator.catchError(
       where: { id: story_Id, userId: req.user?.id },
     });
     if (!story) {
-      throw new HttpError("Story not found", 404);
+      throw new HttpError("Story not found", 400);
     }
 
     const baseUrl = `${req.protocol}://${req.get("host")}/uploads/`;
