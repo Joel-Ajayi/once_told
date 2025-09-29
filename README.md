@@ -8,13 +8,13 @@ Once Told is a collaborative storytelling platform built by Ajayi and Maxwell ai
 - Transcribe audio to text using Google's Gemini transcription API  
 - Secure user authentication with JWT  
 - Store audio files and transcripts in PostgreSQL  
-- Clean, intuitive React/Next.js frontend  
+- Clean, intuitive Vue.js frontend  
 
 ## Getting Started
 
 ### Prerequisites for client
-
-
+- [Click me](https://github.com/Maxxiejay/once-told) to find the Client App
+  
 ### Prerequisites for Server
 
 - Node.js >= 16  
