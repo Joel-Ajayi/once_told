@@ -57,7 +57,9 @@ if (!fs.existsSync(uploadDir)) {
 const storage = multer.diskStorage({
   destination: (_req, _file, cb) => cb(null, uploadDir),
   filename: (_req, file, cb) => {
-    const newName = uniqid() + path.extname(file.originalname);
+    const ext = path.extname(file.originalname);
+    const extension = ext || ".mp3";
+    const newName = `${uniqid()}${extension}`;
     return cb(null, newName);
   },
 });
