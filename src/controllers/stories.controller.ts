@@ -128,7 +128,8 @@ export const transcribeStory = validator.catchError(
         // // fallback checks for different response shapes
         // transcribedText = result?.text || "";
 
-        transcribedText = result.text || "";
+        transcribedText =
+          result.text || "Could not transcribe audio. Try manually.";
       } catch (err) {
         throw new HttpError("Transcription service failed", 502);
       }
@@ -172,7 +173,7 @@ export const translateStory = validator.catchError(
           model: "gemini-2.5-flash",
           contents: prompt,
         });
-        translatedText = result.text || "";
+        translatedText = result.text || "Could not translate. Try manually.";
       } catch (err) {
         throw new HttpError("Translation service failed", 502);
       }
