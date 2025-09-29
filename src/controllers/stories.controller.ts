@@ -48,39 +48,43 @@ export const createStory = validator.catchError(
   }
 );
 
-export const getStories = async (req: AuthenticatedRequest, res: Response) => {
-  try {
-    const userId = req.user?.id;
-    const stories = await db.story.findMany({
-      where: { userId },
-    });
-    res.status(200).json(stories); // changed to 200
-  } catch (error) {
-    throw new HttpError("Failed to get stories", 500);
-  }
-};
-
-export const getStory = async (req: AuthenticatedRequest, res: Response) => {
-  try {
-    const story_Id = String(req.body?.story_Id || "");
-    if (!story_Id) {
-      throw new HttpError("Invalid story id", 400);
+export const getStories = validator.catchError(
+  async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const userId = req.user?.id;
+      const stories = await db.story.findMany({
+        where: { userId },
+      });
+      res.status(200).json(stories); // changed to 200
+    } catch (error) {
+      throw new HttpError("Failed to get stories", 500);
     }
-
-    const userId = req.user?.id;
-    const story = await db.story.findUnique({
-      where: { userId, id: story_Id },
-    });
-
-    if (!story) {
-      throw new HttpError("Story not found", 404);
-    }
-
-    res.status(200).json(story); // changed to 200
-  } catch (error) {
-    throw new HttpError("Failed to get stories", 500);
   }
-};
+);
+
+export const getStory = validator.catchError(
+  async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const story_Id = String(req.body?.story_Id || "");
+      if (!story_Id) {
+        throw new HttpError("Invalid story id", 400);
+      }
+
+      const userId = req.user?.id;
+      const story = await db.story.findUnique({
+        where: { userId, id: story_Id },
+      });
+
+      if (!story) {
+        throw new HttpError("Story not found", 404);
+      }
+
+      res.status(200).json(story); // changed to 200
+    } catch (error) {
+      throw new HttpError("Failed to get stories", 500);
+    }
+  }
+);
 
 export const transcribeStory = validator.catchError(
   async (req: AuthenticatedRequest, res: Response) => {
@@ -142,47 +146,46 @@ export const transcribeStory = validator.catchError(
   }
 );
 
-export const translateStory = async (
-  req: AuthenticatedRequest,
-  res: Response
-) => {
-  const story_Id = String(req.body?.story_Id || "");
-  if (!story_Id) {
-    throw new HttpError("Invalid story id", 400);
-  }
-
-  const story = await db.story.findFirst({
-    where: { id: story_Id, userId: req.user?.id },
-  });
-  if (!story) {
-    throw new HttpError("Story not found", 404);
-  }
-
-  let translatedText = (req.body?.translation as string) || "";
-  if (!translatedText) {
-    if (!story.transcript) {
-      throw new HttpError("Transcription required for translation", 400);
+export const translateStory = validator.catchError(
+  async (req: AuthenticatedRequest, res: Response) => {
+    const story_Id = String(req.body?.story_Id || "");
+    if (!story_Id) {
+      throw new HttpError("Invalid story id", 400);
     }
 
-    try {
-      const prompt = `Translate the following transcript from ${req.user?.language} to English: ${story.transcript}. Your answer should be direct translation without any additional commentary.`;
-      const result: any = await ai.models.generateContent({
-        model: "gemini-2.5-flash",
-        contents: prompt,
-      });
-      translatedText = result.text || "";
-    } catch (err) {
-      throw new HttpError("Translation service failed", 502);
+    const story = await db.story.findFirst({
+      where: { id: story_Id, userId: req.user?.id },
+    });
+    if (!story) {
+      throw new HttpError("Story not found", 404);
     }
-  }
 
-  if (!translatedText) {
-    throw new HttpError("Translation returned no text", 500);
-  }
+    let translatedText = (req.body?.translation as string) || "";
+    if (!translatedText) {
+      if (!story.transcript) {
+        throw new HttpError("Transcription required for translation", 400);
+      }
 
-  const updated = await db.story.update({
-    where: { id: story.id },
-    data: { translation: translatedText },
-  });
-  return res.status(200).json(updated);
-};
+      try {
+        const prompt = `Translate the following transcript from ${req.user?.language} to English: ${story.transcript}. Your answer should be direct translation without any additional commentary.`;
+        const result: any = await ai.models.generateContent({
+          model: "gemini-2.5-flash",
+          contents: prompt,
+        });
+        translatedText = result.text || "";
+      } catch (err) {
+        throw new HttpError("Translation service failed", 502);
+      }
+    }
+
+    if (!translatedText) {
+      throw new HttpError("Translation returned no text", 500);
+    }
+
+    const updated = await db.story.update({
+      where: { id: story.id },
+      data: { translation: translatedText },
+    });
+    return res.status(200).json(updated);
+  }
+);
